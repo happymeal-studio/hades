@@ -1,0 +1,164 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/Tree.tscn" id="1_tree"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://scripts/CameraRig.gd" id="3_camera_rig"]
+[ext_resource type="Script" path="res://scripts/ClickMarker.gd" id="4_click_marker"]
+[ext_resource type="PackedScene" path="res://scenes/MeleeEnemy.tscn" id="5_melee"]
+[ext_resource type="Script" path="res://scripts/DebugHud.gd" id="6_debug_hud"]
+
+[sub_resource type="StandardMaterial3D" id="ground_mat"]
+albedo_color = Color(0.3, 0.5, 0.22, 1)
+
+[sub_resource type="PlaneMesh" id="ground_mesh"]
+material = SubResource("ground_mat")
+size = Vector2(40, 40)
+
+[sub_resource type="BoxShape3D" id="ground_shape"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxShape3D" id="wall_ns"]
+size = Vector3(42, 4, 1)
+
+[sub_resource type="BoxShape3D" id="wall_ew"]
+size = Vector3(1, 4, 42)
+
+[sub_resource type="Environment" id="env"]
+background_mode = 1
+background_color = Color(0.2, 0.26, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.75, 0.8, 0.9, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="marker_mat"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 0.85)
+
+[sub_resource type="TorusMesh" id="marker_mesh"]
+material = SubResource("marker_mat")
+inner_radius = 0.22
+outer_radius = 0.32
+rings = 24
+ring_segments = 6
+
+[node name="Main" type="Node3D"]
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="Ground" type="StaticBody3D" parent="World"]
+collision_mask = 0
+
+[node name="Mesh" type="MeshInstance3D" parent="World/Ground"]
+mesh = SubResource("ground_mesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("ground_shape")
+
+[node name="Walls" type="Node3D" parent="World"]
+
+[node name="North" type="StaticBody3D" parent="World/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -20.5)
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Walls/North"]
+shape = SubResource("wall_ns")
+
+[node name="South" type="StaticBody3D" parent="World/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 20.5)
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Walls/South"]
+shape = SubResource("wall_ns")
+
+[node name="West" type="StaticBody3D" parent="World/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 2, 0)
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Walls/West"]
+shape = SubResource("wall_ew")
+
+[node name="East" type="StaticBody3D" parent="World/Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.5, 2, 0)
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="World/Walls/East"]
+shape = SubResource("wall_ew")
+
+[node name="Trees" type="Node3D" parent="World"]
+
+[node name="Tree1" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -10)
+
+[node name="Tree2" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -14)
+
+[node name="Tree3" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -12)
+
+[node name="Tree4" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -5)
+
+[node name="Tree5" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 0, -1)
+
+[node name="Tree6" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, 5)
+
+[node name="Tree7" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 4)
+
+[node name="Tree8" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, 11)
+
+[node name="Tree9" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 13)
+
+[node name="Tree10" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 12)
+
+[node name="Tree11" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 14)
+
+[node name="Tree12" parent="World/Trees" instance=ExtResource("1_tree")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -8)
+
+[node name="Sun" type="DirectionalLight3D" parent="World"]
+transform = Transform3D(0.866025, 0.409576, -0.286788, 0, 0.573576, 0.819152, 0.5, -0.709406, 0.496732, 0, 10, 0)
+light_energy = 1.1
+shadow_enabled = true
+directional_shadow_max_distance = 60.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
+environment = SubResource("env")
+
+[node name="Player" parent="." node_paths=PackedStringArray("click_marker") instance=ExtResource("2_player")]
+click_marker = NodePath("../ClickMarker")
+
+[node name="ClickMarker" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
+cast_shadow = 0
+mesh = SubResource("marker_mesh")
+script = ExtResource("4_click_marker")
+end_scale = 0.6
+
+[node name="CameraRig" type="Node3D" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("3_camera_rig")
+target = NodePath("../Player")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 15, 21.2132, 15)
+projection = 1
+current = true
+size = 20.0
+near = 0.5
+far = 100.0
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="MeleeEnemy" parent="Enemies" instance=ExtResource("5_melee")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -3)
+
+[node name="DebugHud" type="CanvasLayer" parent="."]
+script = ExtResource("6_debug_hud")

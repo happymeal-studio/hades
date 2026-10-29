@@ -1,0 +1,18 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Export output
+/build/
+/builds/
+/build.zip
+*.pck
+*.apk
+*.aab
+*.exe
+*.dmg
+*.x86_64
+*.app/
+
+# macOS
+.DS_Store
