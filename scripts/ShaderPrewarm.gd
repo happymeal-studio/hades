@@ -1,7 +1,8 @@
 extends Node3D
 ## 처음 그릴 때의 셰이더 컴파일 멈춤을 없애려고, 게임 시작 때 바닥 아래 안 보이는 곳에
 ## 각 씬을 한 번씩 그려 두었다가 지운다. 숨겨진 부분(경고 원, 체력 바)과
-## 사라지는 효과(transparency)까지 같이 그린다. 적은 그룹·충돌에서 빼서 게임에 끼어들지 않게 한다.
+## 사라지는 효과(transparency)까지 같이 그린다. 체력 바처럼 깊이 검사를 끈 것은 바닥에 가려지지 않으므로
+## 거의 투명하게 그린다. 적은 그룹·충돌에서 빼서 게임에 끼어들지 않게 한다.
 
 @export var scenes: Array[PackedScene] = []
 
@@ -19,7 +20,7 @@ func _ready() -> void:
 			node.collision_mask = 0
 		for geometry in node.find_children("*", "GeometryInstance3D", true, false):
 			geometry.visible = true
-			geometry.transparency = 0.01
+			geometry.transparency = 0.99
 	await get_tree().process_frame
 	await get_tree().process_frame
 	for child in get_children():

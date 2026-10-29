@@ -60,6 +60,8 @@ var _missile_cooldown_left := 0.0
 var _teleport_cooldown_left := 0.0
 var _invincible_left := 0.0
 var _blink_left := 0.0
+## 물리 프레임 사이에 눌렀다 뗀 아주 짧은 입력(트랙패드 탭 등)도 놓치지 않게, 눌린 동작을 다음 물리 프레임까지 기억한다.
+var _tapped := {}
 
 @onready var _model: Node3D = $Model
 @onready var _body_shape: CollisionShape3D = $CollisionShape3D
@@ -70,7 +72,26 @@ func _ready() -> void:
 	melee_fan.build(melee_range, melee_angle)
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	for action in [&"move", &"attack_melee", &"cast_missile", &"teleport"]:
+		if event.is_action_pressed(action):
+			_tapped[action] = true
+
+
 func _physics_process(delta: float) -> void:
+	_physics_step(delta)
+	_tapped.clear()
+
+
+func _pressed(action: StringName) -> bool:
+	return Input.is_action_pressed(action) or _tapped.has(action)
+
+
+func _just_pressed(action: StringName) -> bool:
+	return Input.is_action_just_pressed(action) or _tapped.has(action)
+
+
+func _physics_step(delta: float) -> void:
 	if is_dead:
 		return
 	_attack_pause_left = maxf(_attack_pause_left - delta, 0.0)
@@ -82,11 +103,11 @@ func _physics_process(delta: float) -> void:
 	_model.visible = _blink_left <= 0.0 or fmod(_blink_left, blink_interval * 2.0) < blink_interval
 
 	# 우클릭·Q는 누르고 있으면 쿨다운마다 반복, Space는 누를 때마다 한 번.
-	if Input.is_action_pressed("attack_melee") and _melee_cooldown_left <= 0.0:
+	if _pressed(&"attack_melee") and _melee_cooldown_left <= 0.0:
 		melee_attack(_aim_direction())
-	if Input.is_action_pressed("cast_missile") and _missile_cooldown_left <= 0.0:
+	if _pressed(&"cast_missile") and _missile_cooldown_left <= 0.0:
 		cast_missile(_aim_direction())
-	if Input.is_action_just_pressed("teleport") and _teleport_cooldown_left <= 0.0:
+	if _just_pressed(&"teleport") and _teleport_cooldown_left <= 0.0:
 		var point = get_cursor_ground_point()
 		if point != null:
 			try_teleport(point)
@@ -228,9 +249,9 @@ func _yaw_of(dir: Vector3) -> float:
 
 
 func _update_click_target() -> void:
-	if Input.is_action_just_pressed("move"):
+	if _just_pressed(&"move"):
 		_click_locked = false
-	if _click_locked or not Input.is_action_pressed("move"):
+	if _click_locked or not _pressed(&"move"):
 		return
 	var point = get_cursor_ground_point()
 	if point == null:
@@ -240,7 +261,7 @@ func _update_click_target() -> void:
 		0.0,
 		clampf(point.z, -map_half_size, map_half_size))
 	_has_target = true
-	if Input.is_action_just_pressed("move") and click_marker:
+	if _just_pressed(&"move") and click_marker:
 		click_marker.show_at(_target)
 
 

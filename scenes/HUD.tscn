@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/HUD.gd" id="1_hud"]
+[ext_resource type="FontFile" path="res://fonts/NotoSansKR.ttf" id="2_font"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
+web_font = ExtResource("2_font")

@@ -9,6 +9,8 @@ extends CanvasLayer
 @export var defeat_delay := 1.0
 @export var victory_delay := 0.6
 @export var font_names := PackedStringArray(["Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "NanumGothic", "sans-serif"])
+## 웹 브라우저에서는 시스템 폰트를 쓸 수 없어서 이 폰트로 한글을 표시한다.
+@export var web_font: Font
 
 const SKILLS := [
 	{"id": &"melee", "name": "근접", "key": "우클릭"},
@@ -59,10 +61,12 @@ func _ready() -> void:
 	_set_health(_player.health, _player.max_health)
 
 
-func _process(delta: float) -> void:
-	if Input.is_action_just_pressed("restart"):
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("restart"):
 		get_tree().reload_current_scene()
-		return
+
+
+func _process(delta: float) -> void:
 	for id in _slots:
 		var slot: Dictionary = _slots[id]
 		if slot.left <= 0.0:
@@ -257,8 +261,13 @@ func _build_result() -> void:
 
 
 func _make_theme() -> Theme:
-	var font := SystemFont.new()
-	font.font_names = font_names
+	var font: Font
+	if OS.has_feature("web") and web_font:
+		font = web_font
+	else:
+		var system_font := SystemFont.new()
+		system_font.font_names = font_names
+		font = system_font
 	var theme := Theme.new()
 	theme.default_font = font
 	theme.default_font_size = 20
