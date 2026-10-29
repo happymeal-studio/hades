@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Tree.tscn" id="1_tree"]
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2_player"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/BruteEnemy.tscn" id="10_brute"]
 [ext_resource type="PackedScene" path="res://scenes/EnemyArrow.tscn" id="11_arrow"]
 [ext_resource type="Script" path="res://scripts/WaveManager.gd" id="12_wave_manager"]
+[ext_resource type="PackedScene" path="res://scenes/Chest.tscn" id="13_chest"]
 
 [sub_resource type="StandardMaterial3D" id="ground_mat"]
 albedo_color = Color(0.3, 0.5, 0.22, 1)
@@ -142,6 +143,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 14)
 
 [node name="Tree12" parent="World/Trees" instance=ExtResource("1_tree")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -8)
+
+[node name="Chest" parent="World" instance=ExtResource("13_chest")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3)
 
 [node name="SpawnPoints" type="Node3D" parent="World"]
 

@@ -17,6 +17,8 @@ enum State { CHASE, WINDUP, RECOVER, DEAD }
 ## 공격과 공격 사이 간격(예비 동작 포함).
 @export var attack_interval := 1.0
 @export var damage := 10.0
+## 쓰러질 때 플레이어가 받는 경험치
+@export var xp_reward := 20
 @export var takes_knockback := true
 @export var knockback_time := 0.15
 @export var flash_time := 0.1
@@ -220,6 +222,8 @@ func _die() -> void:
 	collision_mask = 0
 	velocity = Vector3.ZERO
 	died.emit(self)
+	if player:
+		player.gain_xp(xp_reward)
 	var tween := create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
 	tween.tween_property(self, "scale", Vector3.ONE * 0.01, death_time)
 	tween.tween_callback(queue_free)

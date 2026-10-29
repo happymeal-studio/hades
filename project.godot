@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="Hades"
-config/features=PackedStringArray("4.7", "GL Compatibility")
 run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [display]
@@ -80,8 +80,8 @@ restart={
 
 [physics]
 
-common/physics_interpolation=true
 3d/physics_engine="Jolt Physics"
+common/physics_interpolation=true
 
 [rendering]
 

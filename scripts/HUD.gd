@@ -1,5 +1,5 @@
 extends CanvasLayer
-## 화면 UI: 체력 바, 스킬 쿨다운 3칸, 웨이브 표시, 웨이브 안내, 피격 비네트, 결과 화면.
+## 화면 UI: 체력 바, 경험치 바, 스킬 쿨다운 3칸, 웨이브 표시, 웨이브 안내, 피격 비네트, 결과 화면.
 ## 플레이어·WaveManager의 신호만 듣는다. 결과 화면을 띄울 때만 WaveManager의 처치 수·경과 시간을 읽는다.
 
 @export var wave_manager: Node
@@ -34,6 +34,8 @@ var _player: Node3D
 var _root: Control
 var _health_fill: ColorRect
 var _health_label: Label
+var _xp_fill: ColorRect
+var _xp_label: Label
 var _wave_label: Label
 var _announce_label: Label
 var _vignette: ColorRect
@@ -55,10 +57,13 @@ func _ready() -> void:
 	_player.health_changed.connect(_on_health_changed)
 	_player.died.connect(_on_player_died)
 	_player.skill_used.connect(_on_skill_used)
+	_player.xp_changed.connect(_set_xp)
+	_player.leveled_up.connect(_on_leveled_up)
 	wave_manager.wave_started.connect(_on_wave_started)
 	wave_manager.remaining_changed.connect(_on_remaining_changed)
 	wave_manager.all_waves_cleared.connect(_on_all_waves_cleared)
 	_set_health(_player.health, _player.max_health)
+	_set_xp(_player.xp, _player.xp_per_level, _player.level)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -91,6 +96,10 @@ func _on_skill_used(skill: StringName, cooldown: float) -> void:
 		_slots[skill].name_label.visible = false
 
 
+func _on_leveled_up(level: int) -> void:
+	_announce("레벨 업! Lv %d · 공격 범위 증가" % level)
+
+
 func _on_wave_started(wave_number: int, wave_count: int) -> void:
 	_wave_number = wave_number
 	_wave_count = wave_count
@@ -116,6 +125,11 @@ func _on_all_waves_cleared() -> void:
 func _set_health(current: float, maximum: float) -> void:
 	_health_fill.set_anchor(SIDE_RIGHT, clampf(current / maximum, 0.0, 1.0), true)
 	_health_label.text = "%d / %d" % [ceili(current), maximum]
+
+
+func _set_xp(current: int, needed: int, level: int) -> void:
+	_xp_fill.set_anchor(SIDE_RIGHT, clampf(float(current) / needed, 0.0, 1.0), true)
+	_xp_label.text = "Lv %d · 경험치 %d / %d" % [level, current, needed]
 
 
 func _flash_vignette() -> void:
@@ -166,6 +180,7 @@ func _build() -> void:
 	_root.add_child(_vignette)
 
 	_build_health_bar()
+	_build_xp_bar()
 	_build_skill_slots()
 
 	_wave_label = _make_label("준비", 26)
@@ -201,6 +216,24 @@ func _build_health_bar() -> void:
 	_health_label = _make_label("", 20)
 	_health_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	panel.add_child(_health_label)
+
+
+## 체력 바 바로 위의 얇은 바.
+func _build_xp_bar() -> void:
+	var panel := _make_panel()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_set_offsets(panel, MARGIN, -MARGIN - 34 - 8 - 24, MARGIN + 300, -MARGIN - 34 - 8)
+	_root.add_child(panel)
+
+	_xp_fill = ColorRect.new()
+	_xp_fill.color = Color(0.95, 0.75, 0.15)
+	_xp_fill.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_set_offsets(_xp_fill, 3, 3, -3, -3)
+	panel.add_child(_xp_fill)
+
+	_xp_label = _make_label("", 15)
+	_xp_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.add_child(_xp_label)
 
 
 func _build_skill_slots() -> void:

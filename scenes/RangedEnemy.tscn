@@ -22,6 +22,7 @@ move_speed = 2.5
 windup_time = 0.5
 attack_interval = 2.0
 damage = 8.0
+xp_reward = 30
 body_color = Color(1, 0.55, 0.1, 1)
 windup_color = Color(1, 0.95, 0.55, 1)
 health_bar_height = 2.0

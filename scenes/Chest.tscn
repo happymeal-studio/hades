@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/Chest.gd" id="1_chest"]
+[ext_resource type="PackedScene" uid="uid://ceduo0a7b5x3x" path="res://export/chest.glb" id="2_model"]
+
+[node name="Chest" type="Node3D"]
+script = ExtResource("1_chest")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]

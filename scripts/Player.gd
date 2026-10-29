@@ -4,6 +4,8 @@ signal health_changed(current: float, maximum: float)
 signal died
 ## 스킬을 쓴 순간(HUD 쿨다운 표시용). skill은 &"melee", &"missile", &"teleport".
 signal skill_used(skill: StringName, cooldown: float)
+signal xp_changed(current: int, needed: int, level: int)
+signal leveled_up(level: int)
 
 @export_group("이동")
 @export var move_speed := 5.0
@@ -40,6 +42,12 @@ signal skill_used(skill: StringName, cooldown: float)
 @export var teleport_invincible_time := 0.3
 @export var teleport_cooldown := 3.0
 
+@export_group("성장")
+## 다음 레벨까지 필요한 경험치(레벨마다 같다)
+@export var xp_per_level := 100
+## 레벨이 오를 때마다 근접 공격 거리가 늘어나는 양(m)
+@export var melee_range_per_level := 0.6
+
 @export_group("연결")
 @export var click_marker: Node3D
 @export var melee_fan: Node3D
@@ -49,6 +57,8 @@ signal skill_used(skill: StringName, cooldown: float)
 
 var health: float
 var is_dead := false
+var level := 1
+var xp := 0
 
 var _target := Vector3.ZERO
 var _has_target := false
@@ -129,6 +139,20 @@ func take_damage(amount: float, _from_position: Vector3, _knockback := 0.0) -> v
 		return
 	_invincible_left = hurt_invincible_time
 	_blink_left = hurt_invincible_time
+
+
+## 경험치가 xp_per_level만큼 쌓일 때마다 레벨이 오르고 근접 공격 거리가 늘어난다.
+func gain_xp(amount: int) -> void:
+	if is_dead:
+		return
+	xp += amount
+	while xp >= xp_per_level:
+		xp -= xp_per_level
+		level += 1
+		melee_range += melee_range_per_level
+		melee_fan.build(melee_range, melee_angle)
+		leveled_up.emit(level)
+	xp_changed.emit(xp, xp_per_level, level)
 
 
 ## 커서 방향 부채꼴 안의 적 전부에게 피해 + 넉백. Area3D 없이 거리·각도만으로 판정한다.
