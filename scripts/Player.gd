@@ -2,6 +2,8 @@ extends CharacterBody3D
 
 signal health_changed(current: float, maximum: float)
 signal died
+## 스킬을 쓴 순간(HUD 쿨다운 표시용). skill은 &"melee", &"missile", &"teleport".
+signal skill_used(skill: StringName, cooldown: float)
 
 @export_group("이동")
 @export var move_speed := 5.0
@@ -111,6 +113,7 @@ func take_damage(amount: float, _from_position: Vector3, _knockback := 0.0) -> v
 ## 커서 방향 부채꼴 안의 적 전부에게 피해 + 넉백. Area3D 없이 거리·각도만으로 판정한다.
 func melee_attack(aim: Vector3) -> void:
 	_melee_cooldown_left = melee_cooldown
+	skill_used.emit(&"melee", melee_cooldown)
 	_start_attack_pause(aim)
 	melee_fan.play()
 	var min_dot := cos(deg_to_rad(melee_angle * 0.5))
@@ -127,6 +130,7 @@ func melee_attack(aim: Vector3) -> void:
 
 func cast_missile(aim: Vector3) -> void:
 	_missile_cooldown_left = missile_cooldown
+	skill_used.emit(&"missile", missile_cooldown)
 	_start_attack_pause(aim)
 	var missile := missile_scene.instantiate()
 	projectiles.add_child(missile)
@@ -153,6 +157,7 @@ func try_teleport(point: Vector3) -> bool:
 	rotation.y = _yaw_of(offset.normalized())
 	_has_target = false
 	_teleport_cooldown_left = teleport_cooldown
+	skill_used.emit(&"teleport", teleport_cooldown)
 	_invincible_left = maxf(_invincible_left, teleport_invincible_time)
 	if teleport_from_ring:
 		teleport_from_ring.show_at(origin)

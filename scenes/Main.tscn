@@ -5,7 +5,7 @@
 [ext_resource type="Script" path="res://scripts/CameraRig.gd" id="3_camera_rig"]
 [ext_resource type="Script" path="res://scripts/GroundRing.gd" id="4_ground_ring"]
 [ext_resource type="PackedScene" path="res://scenes/MeleeEnemy.tscn" id="5_melee"]
-[ext_resource type="Script" path="res://scripts/DebugHud.gd" id="6_debug_hud"]
+[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="6_hud"]
 [ext_resource type="PackedScene" path="res://scenes/MagicMissile.tscn" id="7_missile"]
 [ext_resource type="Script" path="res://scripts/ShaderPrewarm.gd" id="8_prewarm"]
 [ext_resource type="PackedScene" path="res://scenes/RangedEnemy.tscn" id="9_ranged"]
@@ -236,5 +236,5 @@ spawn_points = NodePath("../World/SpawnPoints")
 script = ExtResource("8_prewarm")
 scenes = Array[PackedScene]([ExtResource("7_missile"), ExtResource("11_arrow"), ExtResource("5_melee"), ExtResource("9_ranged"), ExtResource("10_brute")])
 
-[node name="DebugHud" type="CanvasLayer" parent="."]
-script = ExtResource("6_debug_hud")
+[node name="HUD" parent="." node_paths=PackedStringArray("wave_manager") instance=ExtResource("6_hud")]
+wave_manager = NodePath("../WaveManager")
