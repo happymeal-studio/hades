@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/Projectile.gd" id="1_projectile"]
+
+[sub_resource type="StandardMaterial3D" id="arrow_mat"]
+shading_mode = 0
+albedo_color = Color(1, 0.75, 0.3, 1)
+
+[sub_resource type="BoxMesh" id="arrow_mesh"]
+material = SubResource("arrow_mat")
+size = Vector3(0.1, 0.1, 0.7)
+
+[sub_resource type="SphereShape3D" id="arrow_shape"]
+radius = 0.15
+
+[node name="EnemyArrow" type="Area3D"]
+collision_layer = 16
+collision_mask = 3
+monitorable = false
+script = ExtResource("1_projectile")
+speed = 7.0
+max_distance = 20.0
+damage = 8.0
+hit_effect = false
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("arrow_mesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("arrow_shape")

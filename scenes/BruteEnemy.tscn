@@ -1,0 +1,72 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/BruteEnemy.gd" id="1_brute"]
+
+[sub_resource type="CapsuleMesh" id="body_mesh"]
+radius = 0.7
+height = 2.6
+
+[sub_resource type="CapsuleShape3D" id="body_shape"]
+radius = 0.7
+height = 2.6
+
+[sub_resource type="StandardMaterial3D" id="warning_area_mat"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.95, 0, 0, 0.5)
+
+[sub_resource type="CylinderMesh" id="warning_area_mesh"]
+material = SubResource("warning_area_mat")
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.02
+radial_segments = 48
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="warning_fill_mat"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.15, 0.1, 0.5)
+
+[sub_resource type="CylinderMesh" id="warning_fill_mesh"]
+material = SubResource("warning_fill_mat")
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.02
+radial_segments = 48
+rings = 1
+
+[node name="BruteEnemy" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 7
+motion_mode = 1
+script = ExtResource("1_brute")
+max_health = 150.0
+move_speed = 1.8
+body_radius = 0.7
+attack_range = 2.0
+windup_time = 0.8
+attack_interval = 2.5
+damage = 25.0
+takes_knockback = false
+body_color = Color(0.55, 0.25, 0.8, 1)
+windup_color = Color(0.95, 0.4, 0.65, 1)
+health_bar_height = 3.0
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+mesh = SubResource("body_mesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+shape = SubResource("body_shape")
+
+[node name="WarningArea" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+cast_shadow = 0
+mesh = SubResource("warning_area_mesh")
+
+[node name="WarningFill" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 0)
+cast_shadow = 0
+mesh = SubResource("warning_fill_mesh")

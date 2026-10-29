@@ -25,6 +25,17 @@ enum State { CHASE, WINDUP, RECOVER, DEAD }
 @export var body_color := Color(0.9, 0.2, 0.2)
 @export var windup_color := Color(1.0, 0.85, 0.2)
 
+@export_group("체력 바")
+@export var health_bar_height := 1.7
+@export var health_bar_color := Color(0.95, 0.25, 0.2)
+@export var health_bar_back_color := Color(0.1, 0.1, 0.1, 0.8)
+
+const BAR_PIXELS := Vector2i(100, 12)
+const BAR_PIXEL_SIZE := 0.01
+
+## 모든 적의 체력 바가 함께 쓰는 흰색 텍스처
+static var _bar_texture: ImageTexture
+
 var health: float
 var state := State.CHASE
 var player: Node3D
@@ -34,6 +45,8 @@ var _flash_left := 0.0
 var _knockback_left := 0.0
 var _knockback_velocity := Vector3.ZERO
 var _material: StandardMaterial3D
+var _bar_back: Sprite3D
+var _bar_front: Sprite3D
 
 @onready var _body: MeshInstance3D = $Body
 
@@ -44,6 +57,8 @@ func _ready() -> void:
 	_material = StandardMaterial3D.new()
 	_material.albedo_color = body_color
 	_body.material_override = _material
+	_bar_back = _make_bar_sprite(health_bar_back_color, 0)
+	_bar_front = _make_bar_sprite(health_bar_color, 1)
 
 
 func _physics_process(delta: float) -> void:
@@ -74,6 +89,7 @@ func take_damage(amount: float, from_position: Vector3, knockback := 0.0) -> voi
 		return
 	health -= amount
 	_flash_left = flash_time
+	_update_health_bar()
 	if health <= 0.0:
 		_die()
 		return
@@ -153,6 +169,37 @@ func _set_state(new_state: State) -> void:
 func _cancel_windup() -> void:
 	_on_windup_cancelled()
 	_set_state(State.CHASE)
+
+
+func _make_bar_sprite(color: Color, priority: int) -> Sprite3D:
+	if _bar_texture == null:
+		var image := Image.create(BAR_PIXELS.x, BAR_PIXELS.y, false, Image.FORMAT_RGBA8)
+		image.fill(Color.WHITE)
+		_bar_texture = ImageTexture.create_from_image(image)
+	var sprite := Sprite3D.new()
+	sprite.texture = _bar_texture
+	sprite.pixel_size = BAR_PIXEL_SIZE
+	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sprite.no_depth_test = true
+	sprite.render_priority = priority
+	sprite.modulate = color
+	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	sprite.region_enabled = true
+	sprite.region_rect = Rect2(Vector2.ZERO, BAR_PIXELS)
+	sprite.position = Vector3(0, health_bar_height, 0)
+	sprite.visible = false
+	add_child(sprite)
+	return sprite
+
+
+## 처음엔 숨겨 두었다가 첫 피해를 입은 뒤부터 보인다. 바는 왼쪽 끝을 고정하고 줄어든다.
+func _update_health_bar() -> void:
+	var ratio := clampf(health / max_health, 0.0, 1.0)
+	var width := BAR_PIXELS.x * ratio
+	_bar_back.visible = true
+	_bar_front.visible = ratio > 0.0
+	_bar_front.region_rect = Rect2(0, 0, width, BAR_PIXELS.y)
+	_bar_front.offset.x = -(BAR_PIXELS.x - width) * 0.5
 
 
 func _update_color() -> void:

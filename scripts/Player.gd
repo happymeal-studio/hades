@@ -26,9 +26,24 @@ signal died
 ## 공격하는 순간 제자리에 서 있는 시간
 @export var attack_pause := 0.15
 
+@export_group("매직 미사일")
+@export var missile_scene: PackedScene
+@export var missile_cooldown := 0.6
+## 몸 중심에서 앞으로 떨어진 발사 위치와 높이
+@export var missile_forward_offset := 0.5
+@export var missile_height := 1.0
+
+@export_group("순간이동")
+@export var teleport_distance := 4.0
+@export var teleport_invincible_time := 0.3
+@export var teleport_cooldown := 3.0
+
 @export_group("연결")
 @export var click_marker: Node3D
 @export var melee_fan: Node3D
+@export var projectiles: Node3D
+@export var teleport_from_ring: Node3D
+@export var teleport_to_ring: Node3D
 
 var health: float
 var is_dead := false
@@ -39,10 +54,13 @@ var _has_target := false
 var _click_locked := false
 var _attack_pause_left := 0.0
 var _melee_cooldown_left := 0.0
+var _missile_cooldown_left := 0.0
+var _teleport_cooldown_left := 0.0
 var _invincible_left := 0.0
 var _blink_left := 0.0
 
 @onready var _model: Node3D = $Model
+@onready var _body_shape: CollisionShape3D = $CollisionShape3D
 
 
 func _ready() -> void:
@@ -55,12 +73,21 @@ func _physics_process(delta: float) -> void:
 		return
 	_attack_pause_left = maxf(_attack_pause_left - delta, 0.0)
 	_melee_cooldown_left = maxf(_melee_cooldown_left - delta, 0.0)
+	_missile_cooldown_left = maxf(_missile_cooldown_left - delta, 0.0)
+	_teleport_cooldown_left = maxf(_teleport_cooldown_left - delta, 0.0)
 	_invincible_left = maxf(_invincible_left - delta, 0.0)
 	_blink_left = maxf(_blink_left - delta, 0.0)
 	_model.visible = _blink_left <= 0.0 or fmod(_blink_left, blink_interval * 2.0) < blink_interval
 
+	# 우클릭·Q는 누르고 있으면 쿨다운마다 반복, Space는 누를 때마다 한 번.
 	if Input.is_action_pressed("attack_melee") and _melee_cooldown_left <= 0.0:
 		melee_attack(_aim_direction())
+	if Input.is_action_pressed("cast_missile") and _missile_cooldown_left <= 0.0:
+		cast_missile(_aim_direction())
+	if Input.is_action_just_pressed("teleport") and _teleport_cooldown_left <= 0.0:
+		var point = get_cursor_ground_point()
+		if point != null:
+			try_teleport(point)
 
 	velocity = Vector3.ZERO
 	if _attack_pause_left <= 0.0:
@@ -96,6 +123,52 @@ func melee_attack(aim: Vector3) -> void:
 		if distance > 0.01 and aim.dot(to / distance) < min_dot:
 			continue
 		enemy.take_damage(melee_damage, global_position, melee_knockback)
+
+
+func cast_missile(aim: Vector3) -> void:
+	_missile_cooldown_left = missile_cooldown
+	_start_attack_pause(aim)
+	var missile := missile_scene.instantiate()
+	projectiles.add_child(missile)
+	missile.launch(global_position + aim * missile_forward_offset + Vector3.UP * missile_height, aim)
+
+
+## 커서 쪽으로 최대 teleport_distance만큼 순간이동한다.
+## 도착점이 나무·벽과 겹치거나 맵 밖이면 발동하지 않고 쿨다운도 쓰지 않는다(나무 너머로 건너뛰기는 된다).
+func try_teleport(point: Vector3) -> bool:
+	var offset := point - global_position
+	offset.y = 0.0
+	if offset.length() < 0.01:
+		return false
+	offset = offset.limit_length(teleport_distance)
+	var destination := global_position + offset
+	if absf(destination.x) > map_half_size or absf(destination.z) > map_half_size:
+		return false
+	if not _is_free_at(destination):
+		return false
+
+	var origin := global_position
+	global_position = destination
+	reset_physics_interpolation()
+	rotation.y = _yaw_of(offset.normalized())
+	_has_target = false
+	_teleport_cooldown_left = teleport_cooldown
+	_invincible_left = maxf(_invincible_left, teleport_invincible_time)
+	if teleport_from_ring:
+		teleport_from_ring.show_at(origin)
+	if teleport_to_ring:
+		teleport_to_ring.show_at(destination)
+	return true
+
+
+## 플레이어 몸(캡슐)을 그 자리에 놓았을 때 나무·벽과 겹치지 않는지.
+func _is_free_at(destination: Vector3) -> bool:
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = _body_shape.shape
+	query.transform = Transform3D(Basis.IDENTITY, destination + _body_shape.position)
+	query.collision_mask = collision_mask
+	query.exclude = [get_rid()]
+	return get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty()
 
 
 ## 커서 아래 바닥(y = 0) 지점. 광선이 바닥과 만나지 않으면 null.
