@@ -13,7 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/EnemyArrow.tscn" id="11_arrow"]
 [ext_resource type="Script" uid="uid://b82wtsvlalegv" path="res://scripts/WaveManager.gd" id="12_wave_manager"]
 [ext_resource type="PackedScene" path="res://scenes/Chest.tscn" id="13_chest"]
-[ext_resource type="PackedScene" uid="uid://ci2nsak24beva" path="res://char/wand.glb" id="18_wand"]
+[ext_resource type="PackedScene" uid="uid://b31gg2ncs4ooa" path="res://char/fries.glb" id="18_fries"]
 
 [sub_resource type="StandardMaterial3D" id="ground_mat"]
 albedo_color = Color(0.3, 0.5, 0.22, 1)
@@ -239,7 +239,7 @@ spawn_points = NodePath("../World/SpawnPoints")
 
 [node name="ShaderPrewarm" type="Node3D" parent="." unique_id=766114288]
 script = ExtResource("8_prewarm")
-scenes = Array[PackedScene]([ExtResource("7_missile"), ExtResource("11_arrow"), ExtResource("5_melee"), ExtResource("9_ranged"), ExtResource("10_brute"), ExtResource("18_wand")])
+scenes = Array[PackedScene]([ExtResource("7_missile"), ExtResource("11_arrow"), ExtResource("5_melee"), ExtResource("9_ranged"), ExtResource("10_brute"), ExtResource("18_fries")])
 
 [node name="HUD" parent="." unique_id=191751505 node_paths=PackedStringArray("wave_manager") instance=ExtResource("6_hud")]
 wave_manager = NodePath("../WaveManager")

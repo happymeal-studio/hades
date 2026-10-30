@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://ci2nsak24beva"
-path="res://.godot/imported/wand.glb-b1fc459a7a69724e63e517ea83f2ef04.scn"
+uid="uid://b31gg2ncs4ooa"
+path="res://.godot/imported/fries.glb-f411b523106ce3020425fdab3f3549d9.scn"
 
 [deps]
 
-source_file="res://char/wand.glb"
-dest_files=["res://.godot/imported/wand.glb-b1fc459a7a69724e63e517ea83f2ef04.scn"]
+source_file="res://char/fries.glb"
+dest_files=["res://.godot/imported/fries.glb-f411b523106ce3020425fdab3f3549d9.scn"]
 
 [params]
 

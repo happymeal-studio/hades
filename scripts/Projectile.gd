@@ -1,5 +1,5 @@
 extends Area3D
-## 직선 투사체(햄스터의 해바라기씨, 적 화살 공용): 처음 맞은 대상 하나에 피해를 주고 사라진다.
+## 직선 투사체(햄스터가 던지는 햄버거, 적 화살 공용): 처음 맞은 대상 하나에 피해를 주고 사라진다.
 ## 누구를 맞히는지는 충돌 마스크가 정한다. 나무·벽에 닿거나 최대 거리를 날면 그냥 사라진다.
 ## 반짝이 효과는 자식 노드가 있을 때만 쓴다: Trail(날아가는 동안 꼬리), LaunchBurst(쏠 때), HitBurst(맞을 때).
 
@@ -10,15 +10,17 @@ extends Area3D
 @export var hit_effect := true
 @export var hit_effect_time := 0.15
 @export var hit_effect_scale := 2.5
-## 날아가는 방향을 축으로 모습이 도는 속도(라디안/초). 0이면 안 돈다.
+## 날아가는 동안 모습이 도는 속도(라디안/초). 0이면 안 돈다.
 @export var spin_speed := 0.0
+## 도는 축(자기 좌표). 앞(FORWARD)이면 드릴처럼, 옆(RIGHT)이면 앞으로 데굴데굴 구르듯 돈다.
+@export var spin_axis := Vector3.FORWARD
 
 var direction := Vector3.FORWARD
 
 var _traveled := 0.0
 var _done := false
 
-## 모습: 메시 하나(화살)이거나, 불러온 모델(해바라기씨 glb)처럼 메시가 안에 든 노드
+## 모습: 메시 하나(화살)이거나, 불러온 모델(햄버거 glb)처럼 메시가 안에 든 노드
 @onready var _mesh: Node3D = $Mesh
 @onready var _trail: CPUParticles3D = get_node_or_null("Trail")
 @onready var _launch_burst: CPUParticles3D = get_node_or_null("LaunchBurst")
@@ -45,7 +47,7 @@ func _physics_process(delta: float) -> void:
 	global_position += direction * step
 	_traveled += step
 	if spin_speed != 0.0:
-		_mesh.rotate_object_local(Vector3.FORWARD, spin_speed * delta)
+		_mesh.rotate_object_local(spin_axis, spin_speed * delta)
 	if _traveled >= max_distance:
 		_vanish(false)
 

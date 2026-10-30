@@ -1,10 +1,10 @@
 [gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/Projectile.gd" id="1_missile"]
-[ext_resource type="PackedScene" uid="uid://4pgriotge0ya" path="res://char/seed_shot.glb" id="2_seed"]
+[ext_resource type="PackedScene" uid="uid://dra4wfvycyvw0" path="res://char/burger.glb" id="2_burger"]
 
 [sub_resource type="SphereShape3D" id="missile_shape"]
-radius = 0.3
+radius = 0.32
 
 [sub_resource type="StandardMaterial3D" id="spark_mat"]
 transparency = 1
@@ -20,7 +20,7 @@ rings = 3
 
 [sub_resource type="Gradient" id="spark_colors"]
 offsets = PackedFloat32Array(0, 0.35, 1)
-colors = PackedColorArray(1, 1, 1, 1, 0.82, 0.62, 1, 0.95, 0.55, 0.3, 0.9, 0)
+colors = PackedColorArray(1, 1, 0.9, 1, 1, 0.8, 0.2, 0.95, 0.9, 0.3, 0.1, 0)
 
 [sub_resource type="Curve" id="spark_shrink"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.2), 0.0, 0.0, 0, 0]
@@ -32,10 +32,10 @@ collision_mask = 5
 monitorable = false
 script = ExtResource("1_missile")
 hit_effect = false
-spin_speed = 14.0
+spin_speed = 12.0
+spin_axis = Vector3(1, 0, 0)
 
-[node name="Mesh" parent="." instance=ExtResource("2_seed")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+[node name="Mesh" parent="." instance=ExtResource("2_burger")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("missile_shape")

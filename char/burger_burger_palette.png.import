@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b2peakoxhan0r"
-path.s3tc="res://.godot/imported/seed_shot_seed_palette.png-d13c711e36f1882988a9b0ab360a532e.s3tc.ctex"
+uid="uid://dk20cwagfoqxu"
+path.s3tc="res://.godot/imported/burger_burger_palette.png-844e0381513be79008158fe698f2a353.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "611f99cff9c600c996993f74f22e6f24"
+"md5": "31f3a0d18d73bb67ef35e8c74c25ebdf"
 }
 
 [deps]
 
-source_file="res://char/seed_shot_seed_palette.png"
-dest_files=["res://.godot/imported/seed_shot_seed_palette.png-d13c711e36f1882988a9b0ab360a532e.s3tc.ctex"]
+source_file="res://char/burger_burger_palette.png"
+dest_files=["res://.godot/imported/burger_burger_palette.png-844e0381513be79008158fe698f2a353.s3tc.ctex"]
 
 [params]
 
