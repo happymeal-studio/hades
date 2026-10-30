@@ -1,10 +1,7 @@
 [gd_scene load_steps=8 format=3]
 
+[ext_resource type="PackedScene" uid="uid://diqmc67oe5t1" path="res://char/seed_brute.glb" id="9_seed"]
 [ext_resource type="Script" path="res://scripts/BruteEnemy.gd" id="1_brute"]
-
-[sub_resource type="CapsuleMesh" id="body_mesh"]
-radius = 0.7
-height = 2.6
 
 [sub_resource type="CapsuleShape3D" id="body_shape"]
 radius = 0.7
@@ -50,13 +47,10 @@ attack_interval = 2.5
 damage = 25.0
 xp_reward = 80
 takes_knockback = false
-body_color = Color(0.55, 0.25, 0.8, 1)
-windup_color = Color(0.95, 0.4, 0.65, 1)
+windup_color = Color(0.95, 0.4, 0.65, 0.55)
 health_bar_height = 3.0
 
-[node name="Body" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
-mesh = SubResource("body_mesh")
+[node name="Model" parent="." instance=ExtResource("9_seed")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)

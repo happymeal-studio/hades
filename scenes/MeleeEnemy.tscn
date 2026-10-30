@@ -1,10 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
+[ext_resource type="PackedScene" uid="uid://c7uvfl8prmajj" path="res://char/seed_melee.glb" id="9_seed"]
 [ext_resource type="Script" path="res://scripts/MeleeEnemy.gd" id="1_melee"]
-
-[sub_resource type="CapsuleMesh" id="body_mesh"]
-radius = 0.35
-height = 1.3
 
 [sub_resource type="CapsuleShape3D" id="body_shape"]
 radius = 0.35
@@ -16,9 +13,7 @@ collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_melee")
 
-[node name="Body" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
-mesh = SubResource("body_mesh")
+[node name="Model" parent="." instance=ExtResource("9_seed")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)

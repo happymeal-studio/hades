@@ -1,11 +1,8 @@
 [gd_scene load_steps=5 format=3]
 
+[ext_resource type="PackedScene" uid="uid://c8p48yyw53j6f" path="res://char/seed_ranged.glb" id="9_seed"]
 [ext_resource type="Script" path="res://scripts/RangedEnemy.gd" id="1_ranged"]
 [ext_resource type="PackedScene" path="res://scenes/EnemyArrow.tscn" id="2_arrow"]
-
-[sub_resource type="CapsuleMesh" id="body_mesh"]
-radius = 0.35
-height = 1.6
 
 [sub_resource type="CapsuleShape3D" id="body_shape"]
 radius = 0.35
@@ -23,13 +20,10 @@ windup_time = 0.5
 attack_interval = 2.0
 damage = 8.0
 xp_reward = 30
-body_color = Color(1, 0.55, 0.1, 1)
-windup_color = Color(1, 0.95, 0.55, 1)
+windup_color = Color(1, 0.95, 0.55, 0.55)
 health_bar_height = 2.0
 
-[node name="Body" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("body_mesh")
+[node name="Model" parent="." instance=ExtResource("9_seed")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)

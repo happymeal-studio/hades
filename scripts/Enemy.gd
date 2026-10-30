@@ -24,8 +24,11 @@ enum State { CHASE, WINDUP, RECOVER, DEAD }
 @export var flash_time := 0.1
 @export var death_time := 0.3
 @export var head_on_threshold := 0.95
-@export var body_color := Color(0.9, 0.2, 0.2)
-@export var windup_color := Color(1.0, 0.85, 0.2)
+## 얼굴이 플레이어 쪽으로 도는 빠르기
+@export var turn_speed := 8.0
+## 모델 원래 색 위에 덮는 색. 알파가 덮는 세기.
+@export var flash_color := Color(1.0, 1.0, 1.0, 0.85)
+@export var windup_color := Color(1.0, 0.85, 0.2, 0.55)
 
 @export_group("체력 바")
 @export var health_bar_height := 1.7
@@ -50,15 +53,20 @@ var _material: StandardMaterial3D
 var _bar_back: Sprite3D
 var _bar_front: Sprite3D
 
-@onready var _body: MeshInstance3D = $Body
+## 앞(얼굴)이 +Z를 보는 모델 (Blender에서 뽑은 glb)
+@onready var _model: Node3D = $Model
 
 
 func _ready() -> void:
 	health = max_health
 	add_to_group("enemies")
+	# 모델 색은 그대로 두고, 피격·예비 동작 색은 반투명 덧칠로 보여 준다.
 	_material = StandardMaterial3D.new()
-	_material.albedo_color = body_color
-	_body.material_override = _material
+	_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_material.albedo_color = Color.TRANSPARENT
+	for mesh_instance in _model.find_children("*", "MeshInstance3D", true, false):
+		mesh_instance.material_overlay = _material
 	_bar_back = _make_bar_sprite(health_bar_back_color, 0)
 	_bar_front = _make_bar_sprite(health_bar_color, 1)
 
@@ -83,6 +91,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	position.y = 0.0
+	_face_player(delta)
 	_update_color()
 
 
@@ -206,11 +215,21 @@ func _update_health_bar() -> void:
 
 func _update_color() -> void:
 	if _flash_left > 0.0:
-		_material.albedo_color = Color.WHITE
+		_material.albedo_color = flash_color
 	elif state == State.WINDUP:
 		_material.albedo_color = windup_color
 	else:
-		_material.albedo_color = body_color
+		_material.albedo_color = Color.TRANSPARENT
+
+
+## 살아 있는 동안 모델 얼굴(+Z)을 플레이어 쪽으로 천천히 돌린다.
+func _face_player(delta: float) -> void:
+	if player == null:
+		return
+	var to := direction_to_player()
+	if to == Vector3.ZERO:
+		return
+	_model.rotation.y = lerp_angle(_model.rotation.y, atan2(to.x, to.z), 1.0 - exp(-turn_speed * delta))
 
 
 func _die() -> void:

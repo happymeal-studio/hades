@@ -48,6 +48,17 @@ signal leveled_up(level: int)
 ## 레벨이 오를 때마다 근접 공격 거리가 늘어나는 양(m)
 @export var melee_range_per_level := 0.6
 
+@export_group("모습")
+## 오른손 검(햄스터 모델의 Sword 노드)을 들고 있는지. 처음엔 맨손이고, 보물상자가 열리면 손에 든다.
+## 검이 있으면 근접 공격이 칼질, 없으면 주먹질.
+@export var has_sword := false:
+	set(value):
+		has_sword = value
+		if _sword:
+			_sword.visible = value
+## 동작이 바뀔 때 섞이는 시간(초)
+@export var anim_blend := 0.12
+
 @export_group("연결")
 @export var click_marker: Node3D
 @export var melee_fan: Node3D
@@ -72,6 +83,10 @@ var _invincible_left := 0.0
 var _blink_left := 0.0
 ## 물리 프레임 사이에 눌렀다 뗀 아주 짧은 입력(트랙패드 탭 등)도 놓치지 않게, 눌린 동작을 다음 물리 프레임까지 기억한다.
 var _tapped := {}
+## 공격 동작이 끝날 때까지 남은 시간. 그동안은 서기·달리기로 바꾸지 않는다.
+var _action_left := 0.0
+var _anim: AnimationPlayer
+var _sword: Node3D
 
 @onready var _model: Node3D = $Model
 @onready var _body_shape: CollisionShape3D = $CollisionShape3D
@@ -80,6 +95,11 @@ var _tapped := {}
 func _ready() -> void:
 	health = max_health
 	melee_fan.build(melee_range, melee_angle)
+	var players := _model.find_children("*", "AnimationPlayer", true, false)
+	_anim = players[0] if players.size() > 0 else null
+	_sword = _model.find_child("Sword", true, false)
+	has_sword = has_sword
+	_update_animation(0.0)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -127,6 +147,7 @@ func _physics_step(delta: float) -> void:
 		velocity = _movement(delta)
 	move_and_slide()
 	position.y = 0.0
+	_update_animation(delta)
 
 
 func take_damage(amount: float, _from_position: Vector3, _knockback := 0.0) -> void:
@@ -160,6 +181,7 @@ func melee_attack(aim: Vector3) -> void:
 	_melee_cooldown_left = melee_cooldown
 	skill_used.emit(&"melee", melee_cooldown)
 	_start_attack_pause(aim)
+	_play_action(&"sword-slash" if has_sword else &"punch", melee_cooldown)
 	melee_fan.play()
 	var min_dot := cos(deg_to_rad(melee_angle * 0.5))
 	for enemy in get_tree().get_nodes_in_group("enemies"):
@@ -177,6 +199,7 @@ func cast_missile(aim: Vector3) -> void:
 	_missile_cooldown_left = missile_cooldown
 	skill_used.emit(&"missile", missile_cooldown)
 	_start_attack_pause(aim)
+	_play_action(&"punch", missile_cooldown)
 	var missile := missile_scene.instantiate()
 	projectiles.add_child(missile)
 	missile.launch(global_position + aim * missile_forward_offset + Vector3.UP * missile_height, aim)
@@ -313,14 +336,38 @@ func _wasd_direction() -> Vector3:
 	return (right.normalized() * input.x - forward.normalized() * input.y).normalized()
 
 
+## 공격 동작을 duration초 안에 끝나게 빨리 재생한다 (공격 간격보다 길면 다음 공격과 겹치므로).
+func _play_action(anim_name: StringName, duration: float) -> void:
+	if _anim == null or not _anim.has_animation(anim_name):
+		return
+	var length := _anim.get_animation(anim_name).length
+	_anim.play(anim_name, anim_blend * 0.5, maxf(length / duration, 1.0))
+	_anim.seek(0.0, true)
+	_action_left = minf(duration, length)
+
+
+## 공격 동작 중이 아니면, 움직이는 동안 달리기·멈추면 서 있기.
+func _update_animation(delta: float) -> void:
+	if _anim == null:
+		return
+	_action_left = maxf(_action_left - delta, 0.0)
+	if _action_left > 0.0:
+		return
+	var wanted := &"run" if velocity.length() > 0.1 else &"idle"
+	if _anim.current_animation != wanted:
+		_anim.play(wanted, anim_blend)
+
+
 ## 회색으로 변하며 옆으로 눕는다.
 func _die() -> void:
 	is_dead = true
 	velocity = Vector3.ZERO
+	if _anim:
+		_anim.pause()
 	_model.visible = true
 	var gray := StandardMaterial3D.new()
 	gray.albedo_color = Color(0.45, 0.45, 0.48)
-	for mesh_instance in _model.get_children():
+	for mesh_instance in _model.find_children("*", "MeshInstance3D", true, false):
 		mesh_instance.material_override = gray
 	var tween := create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS).set_parallel()
 	tween.tween_property(_model, "rotation:z", deg_to_rad(90.0), 0.4)

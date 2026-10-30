@@ -1,22 +1,8 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/MeleeFan.gd" id="2_fan"]
-
-[sub_resource type="StandardMaterial3D" id="body_mat"]
-albedo_color = Color(0.2, 0.45, 0.95, 1)
-
-[sub_resource type="CapsuleMesh" id="body_mesh"]
-material = SubResource("body_mat")
-radius = 0.4
-height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="nose_mat"]
-albedo_color = Color(0.9, 0.95, 1, 1)
-
-[sub_resource type="BoxMesh" id="nose_mesh"]
-material = SubResource("nose_mat")
-size = Vector3(0.28, 0.22, 0.45)
+[ext_resource type="PackedScene" uid="uid://bxlurwsc86ry0" path="res://char/ham.glb" id="3_ham"]
 
 [sub_resource type="CapsuleShape3D" id="body_shape"]
 radius = 0.4
@@ -31,13 +17,8 @@ melee_fan = NodePath("MeleeFan")
 
 [node name="Model" type="Node3D" parent="."]
 
-[node name="Body" type="MeshInstance3D" parent="Model"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("body_mesh")
-
-[node name="Nose" type="MeshInstance3D" parent="Model"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, -0.5)
-mesh = SubResource("nose_mesh")
+[node name="Hamster" parent="Model" instance=ExtResource("3_ham")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
