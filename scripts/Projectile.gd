@@ -1,6 +1,7 @@
 extends Area3D
-## 직선 투사체(매직 미사일, 적 화살 공용): 처음 맞은 대상 하나에 피해를 주고 사라진다.
+## 직선 투사체(햄스터의 해바라기씨, 적 화살 공용): 처음 맞은 대상 하나에 피해를 주고 사라진다.
 ## 누구를 맞히는지는 충돌 마스크가 정한다. 나무·벽에 닿거나 최대 거리를 날면 그냥 사라진다.
+## 반짝이 효과는 자식 노드가 있을 때만 쓴다: Trail(날아가는 동안 꼬리), LaunchBurst(쏠 때), HitBurst(맞을 때).
 
 @export var speed := 12.0
 @export var max_distance := 12.0
@@ -9,13 +10,19 @@ extends Area3D
 @export var hit_effect := true
 @export var hit_effect_time := 0.15
 @export var hit_effect_scale := 2.5
+## 날아가는 방향을 축으로 모습이 도는 속도(라디안/초). 0이면 안 돈다.
+@export var spin_speed := 0.0
 
 var direction := Vector3.FORWARD
 
 var _traveled := 0.0
 var _done := false
 
-@onready var _mesh: MeshInstance3D = $Mesh
+## 모습: 메시 하나(화살)이거나, 불러온 모델(해바라기씨 glb)처럼 메시가 안에 든 노드
+@onready var _mesh: Node3D = $Mesh
+@onready var _trail: CPUParticles3D = get_node_or_null("Trail")
+@onready var _launch_burst: CPUParticles3D = get_node_or_null("LaunchBurst")
+@onready var _hit_burst: CPUParticles3D = get_node_or_null("HitBurst")
 
 
 func _ready() -> void:
@@ -27,6 +34,8 @@ func launch(from: Vector3, dir: Vector3) -> void:
 	direction = dir
 	look_at(from + dir)
 	reset_physics_interpolation()
+	if _launch_burst:
+		_launch_burst.restart()
 
 
 func _physics_process(delta: float) -> void:
@@ -35,6 +44,8 @@ func _physics_process(delta: float) -> void:
 	var step := speed * delta
 	global_position += direction * step
 	_traveled += step
+	if spin_speed != 0.0:
+		_mesh.rotate_object_local(Vector3.FORWARD, spin_speed * delta)
 	if _traveled >= max_distance:
 		_vanish(false)
 
@@ -50,10 +61,25 @@ func _on_body_entered(body: Node3D) -> void:
 func _vanish(hit: bool) -> void:
 	_done = true
 	set_deferred("monitoring", false)
+	# 이미 나온 반짝이는 제자리에서 마저 사라지게 두고, 그동안만 노드를 남겨 둔다.
+	var linger := 0.0
+	if _trail:
+		_trail.emitting = false
+		linger = maxf(linger, _trail.lifetime)
+	if hit and _hit_burst:
+		_hit_burst.restart()
+		linger = maxf(linger, _hit_burst.lifetime)
 	if not (hit and hit_effect):
-		queue_free()
+		_mesh.visible = false
+		if linger <= 0.0:
+			queue_free()
+		else:
+			get_tree().create_timer(linger, false, true).timeout.connect(queue_free)
 		return
 	var tween := create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS).set_parallel()
-	tween.tween_property(_mesh, "scale", Vector3.ONE * hit_effect_scale, hit_effect_time)
-	tween.tween_property(_mesh, "transparency", 1.0, hit_effect_time)
+	tween.tween_property(_mesh, "scale", _mesh.scale * hit_effect_scale, hit_effect_time)
+	for geometry in [_mesh] + _mesh.find_children("*", "GeometryInstance3D", true, false):
+		if geometry is GeometryInstance3D:
+			tween.tween_property(geometry, "transparency", 1.0, hit_effect_time)
+	tween.chain().tween_interval(maxf(linger - hit_effect_time, 0.0))
 	tween.chain().tween_callback(queue_free)

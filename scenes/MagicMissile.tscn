@@ -1,31 +1,94 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/Projectile.gd" id="1_missile"]
-
-[sub_resource type="StandardMaterial3D" id="missile_mat"]
-transparency = 1
-shading_mode = 0
-albedo_color = Color(0.55, 0.9, 1, 1)
-
-[sub_resource type="SphereMesh" id="missile_mesh"]
-material = SubResource("missile_mat")
-radius = 0.18
-height = 0.36
-radial_segments = 16
-rings = 8
+[ext_resource type="PackedScene" uid="uid://4pgriotge0ya" path="res://char/seed_shot.glb" id="2_seed"]
 
 [sub_resource type="SphereShape3D" id="missile_shape"]
-radius = 0.2
+radius = 0.3
+
+[sub_resource type="StandardMaterial3D" id="spark_mat"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="SphereMesh" id="spark_mesh"]
+material = SubResource("spark_mat")
+radius = 0.11
+height = 0.22
+radial_segments = 6
+rings = 3
+
+[sub_resource type="Gradient" id="spark_colors"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.82, 0.62, 1, 0.95, 0.55, 0.3, 0.9, 0)
+
+[sub_resource type="Curve" id="spark_shrink"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.2), 0.0, 0.0, 0, 0]
+point_count = 2
 
 [node name="MagicMissile" type="Area3D"]
 collision_layer = 8
 collision_mask = 5
 monitorable = false
 script = ExtResource("1_missile")
+hit_effect = false
+spin_speed = 14.0
 
-[node name="Mesh" type="MeshInstance3D" parent="."]
-cast_shadow = 0
-mesh = SubResource("missile_mesh")
+[node name="Mesh" parent="." instance=ExtResource("2_seed")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("missile_shape")
+
+[node name="Trail" type="CPUParticles3D" parent="."]
+amount = 40
+lifetime = 0.4
+local_coords = false
+mesh = SubResource("spark_mesh")
+emission_shape = 1
+emission_sphere_radius = 0.2
+direction = Vector3(0, 1, 0)
+spread = 180.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.3
+initial_velocity_max = 0.8
+scale_amount_min = 0.6
+scale_amount_max = 1.2
+scale_amount_curve = SubResource("spark_shrink")
+color_ramp = SubResource("spark_colors")
+
+[node name="LaunchBurst" type="CPUParticles3D" parent="."]
+emitting = false
+amount = 12
+lifetime = 0.3
+one_shot = true
+explosiveness = 1.0
+local_coords = false
+mesh = SubResource("spark_mesh")
+direction = Vector3(0, 0, -1)
+spread = 60.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 1.5
+initial_velocity_max = 3.0
+scale_amount_min = 0.5
+scale_amount_max = 1.0
+scale_amount_curve = SubResource("spark_shrink")
+color_ramp = SubResource("spark_colors")
+
+[node name="HitBurst" type="CPUParticles3D" parent="."]
+emitting = false
+amount = 28
+lifetime = 0.45
+one_shot = true
+explosiveness = 1.0
+local_coords = false
+mesh = SubResource("spark_mesh")
+direction = Vector3(0, 1, 0)
+spread = 180.0
+gravity = Vector3(0, -4, 0)
+initial_velocity_min = 2.5
+initial_velocity_max = 4.5
+scale_amount_min = 0.8
+scale_amount_max = 1.5
+scale_amount_curve = SubResource("spark_shrink")
+color_ramp = SubResource("spark_colors")

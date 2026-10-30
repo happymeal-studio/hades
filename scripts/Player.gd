@@ -30,10 +30,12 @@ signal leveled_up(level: int)
 ## 공격하는 순간 제자리에 서 있는 시간
 @export var attack_pause := 0.15
 
-@export_group("매직 미사일")
+@export_group("해바라기씨 (매직 미사일)")
 @export var missile_scene: PackedScene
 @export var missile_cooldown := 0.6
-## 몸 중심에서 앞으로 떨어진 발사 위치와 높이
+## 한 번에 쏘는 씨앗 수. 1이면 커서 쪽으로 하나만. 2 이상이면 첫 씨앗은 커서 쪽, 나머지는 같은 간격으로 빙 둘러 사방으로 퍼진다.
+@export_range(1, 32) var missile_count := 1
+## 몸 중심에서 쏘는 방향으로 떨어진 발사 위치와 높이
 @export var missile_forward_offset := 0.5
 @export var missile_height := 1.0
 
@@ -49,13 +51,13 @@ signal leveled_up(level: int)
 @export var melee_range_per_level := 0.6
 
 @export_group("모습")
-## 오른손 검(햄스터 모델의 Sword 노드)을 들고 있는지. 처음엔 맨손이고, 보물상자가 열리면 손에 든다.
-## 검이 있으면 근접 공격이 칼질, 없으면 주먹질.
-@export var has_sword := false:
+## 오른손 마법봉(햄스터 모델의 Wand 노드)을 들고 있는지. 처음엔 맨손이고, 보물상자가 열리면 손에 든다.
+## 마법봉이 있으면 근접 공격이 마법봉 휘두르기, 없으면 주먹질.
+@export var has_wand := false:
 	set(value):
-		has_sword = value
-		if _sword:
-			_sword.visible = value
+		has_wand = value
+		if _wand:
+			_wand.visible = value
 ## 동작이 바뀔 때 섞이는 시간(초)
 @export var anim_blend := 0.12
 
@@ -86,7 +88,7 @@ var _tapped := {}
 ## 공격 동작이 끝날 때까지 남은 시간. 그동안은 서기·달리기로 바꾸지 않는다.
 var _action_left := 0.0
 var _anim: AnimationPlayer
-var _sword: Node3D
+var _wand: Node3D
 
 @onready var _model: Node3D = $Model
 @onready var _body_shape: CollisionShape3D = $CollisionShape3D
@@ -97,8 +99,8 @@ func _ready() -> void:
 	melee_fan.build(melee_range, melee_angle)
 	var players := _model.find_children("*", "AnimationPlayer", true, false)
 	_anim = players[0] if players.size() > 0 else null
-	_sword = _model.find_child("Sword", true, false)
-	has_sword = has_sword
+	_wand = _model.find_child("Wand", true, false)
+	has_wand = has_wand
 	_update_animation(0.0)
 
 
@@ -181,7 +183,7 @@ func melee_attack(aim: Vector3) -> void:
 	_melee_cooldown_left = melee_cooldown
 	skill_used.emit(&"melee", melee_cooldown)
 	_start_attack_pause(aim)
-	_play_action(&"sword-slash" if has_sword else &"punch", melee_cooldown)
+	_play_action(&"wand-swing" if has_wand else &"punch", melee_cooldown)
 	melee_fan.play()
 	var min_dot := cos(deg_to_rad(melee_angle * 0.5))
 	for enemy in get_tree().get_nodes_in_group("enemies"):
@@ -200,9 +202,11 @@ func cast_missile(aim: Vector3) -> void:
 	skill_used.emit(&"missile", missile_cooldown)
 	_start_attack_pause(aim)
 	_play_action(&"punch", missile_cooldown)
-	var missile := missile_scene.instantiate()
-	projectiles.add_child(missile)
-	missile.launch(global_position + aim * missile_forward_offset + Vector3.UP * missile_height, aim)
+	for i in missile_count:
+		var dir := aim.rotated(Vector3.UP, TAU * i / missile_count)
+		var missile := missile_scene.instantiate()
+		projectiles.add_child(missile)
+		missile.launch(global_position + dir * missile_forward_offset + Vector3.UP * missile_height, dir)
 
 
 ## 커서 쪽으로 최대 teleport_distance만큼 순간이동한다.

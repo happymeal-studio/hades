@@ -14,7 +14,7 @@ extends CanvasLayer
 
 const SKILLS := [
 	{"id": &"melee", "name": "근접", "key": "우클릭"},
-	{"id": &"missile", "name": "미사일", "key": "Q"},
+	{"id": &"missile", "name": "씨앗", "key": "Q"},
 	{"id": &"teleport", "name": "순간이동", "key": "Space"},
 ]
 const SLOT_SIZE := 76.0

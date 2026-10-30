@@ -2,24 +2,23 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://417ai31va18x"
-path.s3tc="res://.godot/imported/ham_hamster_palette.png-8b07e918e3c02e7d2314a66b87cff46a.s3tc.ctex"
+uid="uid://c1ldl6lg3jxg3"
+path="res://.godot/imported/ham_hamster_palette.png-8b07e918e3c02e7d2314a66b87cff46a.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "e94e6813537c62bb6ae9f0a0668059be"
+"md5": "be86757caa73a29711b4d560462a3cfb"
 }
 
 [deps]
 
 source_file="res://char/ham_hamster_palette.png"
-dest_files=["res://.godot/imported/ham_hamster_palette.png-8b07e918e3c02e7d2314a66b87cff46a.s3tc.ctex"]
+dest_files=["res://.godot/imported/ham_hamster_palette.png-8b07e918e3c02e7d2314a66b87cff46a.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -41,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1
